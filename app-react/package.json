@@ -3,10 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
+    "build:optimized": "ANALYZE=true NODE_ENV=production next build",
     "start": "next start",
-    "lint": "next lint"
+    "start:prod": "NODE_ENV=production next start",
+    "lint": "next lint",
+    "clean": "rimraf .next node_modules/.cache"
   },
   "dependencies": {
     "@prisma/client": "^6.6.0",
@@ -16,16 +19,21 @@
     "prisma": "^6.6.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-icons": "^5.5.0",
+    "react-toastify": "^11.0.5",
+    "socket.io-client": "^4.8.1",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@next/bundle-analyzer": "^15.3.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.1",
+    "rimraf": "^5.0.10",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

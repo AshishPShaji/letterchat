@@ -1,0 +1,21 @@
+const express = require('express');
+const { 
+  sendMessage, 
+  getMessages,
+  deleteMessageForMe,
+  deleteMessageForEveryone,
+  markMessagesAsRead,
+  markMessagesAsDelivered
+} = require('../controllers/messageController');
+const { protect } = require('../middleware/auth');
+
+const router = express.Router();
+
+router.route('/').post(protect, sendMessage);
+router.route('/:chatId').get(protect, getMessages);
+router.route('/:id/forMe').delete(protect, deleteMessageForMe);
+router.route('/:id/forEveryone').delete(protect, deleteMessageForEveryone);
+router.route('/read').put(protect, markMessagesAsRead);
+router.route('/deliver').put(protect, markMessagesAsDelivered);
+
+module.exports = router;

@@ -1,0 +1,115 @@
+interface RequestOptions {
+  method?: string;
+  headers?: Record<string, string>;
+  body?: Record<string, any>;
+}
+
+export const API_URL = "http://localhost:5000/api";
+
+export const fetchAPI = async (endpoint: string, options: RequestOptions = {}) => {
+  const userInfo = localStorage.getItem("userInfo");
+  const token = userInfo ? JSON.parse(userInfo).token : null;
+
+  const defaultHeaders: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (token) {
+    defaultHeaders.Authorization = `Bearer ${token}`;
+  }
+
+  const config: RequestOptions = {
+    method: options.method || "GET",
+    headers: {
+      ...defaultHeaders,
+      ...options.headers,
+    },
+  };
+
+  if (options.body) {
+    config.body = JSON.stringify(options.body);
+  }
+
+  try {
+    const response = await fetch(`${API_URL}${endpoint}`, config as RequestInit);
+    
+    // Check for non-JSON responses
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      const text = await response.text();
+      console.error("Non-JSON response:", text);
+      throw new Error("Server returned non-JSON response. The API server might not be running or is returning an error page.");
+    }
+    
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Something went wrong");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("API request failed:", error, "URL:", `${API_URL}${endpoint}`);
+    if (error instanceof SyntaxError) {
+      // JSON parsing error
+      throw new Error("Failed to parse response as JSON. The API server might not be running correctly.");
+    }
+    throw error;
+  }
+};
+
+// Auth API
+export const loginUser = (email: string, password: string) => 
+  fetchAPI("/auth/login", { method: "POST", body: { email, password } });
+
+export const registerUser = (name: string, email: string, password: string) => 
+  fetchAPI("/auth/register", { method: "POST", body: { name, email, password } });
+
+export const getUserProfile = () => fetchAPI("/auth/profile");
+
+// Chat API
+export const getChats = () => fetchAPI("/chats");
+
+export const getChat = (chatId: string) => fetchAPI(`/chats/${chatId}`);
+
+export const accessChat = (userId: string) => 
+  fetchAPI("/chats", { method: "POST", body: { userId } });
+
+export const createGroupChat = (name: string, users: string[]) => 
+  fetchAPI("/chats/group", { method: "POST", body: { name, users } });
+
+export const renameGroup = (chatId: string, chatName: string) => 
+  fetchAPI("/chats/group/rename", { method: "PUT", body: { chatId, chatName } });
+
+export const addToGroup = (chatId: string, userId: string) => 
+  fetchAPI("/chats/group/add", { method: "PUT", body: { chatId, userId } });
+
+export const removeFromGroup = (chatId: string, userId: string) => 
+  fetchAPI("/chats/group/remove", { method: "PUT", body: { chatId, userId } });
+
+// Message API
+export const sendMessage = (content: string, chatId: string) => 
+  fetchAPI("/messages", { method: "POST", body: { content, chatId } });
+
+export const getMessages = (chatId: string) => fetchAPI(`/messages/${chatId}`);
+
+export const createSMSCampaign = (title: string, content: string, users: string[]) => 
+  fetchAPI("/messages/campaign", { method: "POST", body: { title, content, users } });
+
+// Message deletion API
+export const deleteMessageForMe = (messageId: string) => 
+  fetchAPI(`/messages/${messageId}/forMe`, { method: "DELETE" });
+
+export const deleteMessageForEveryone = (messageId: string) => 
+  fetchAPI(`/messages/${messageId}/forEveryone`, { method: "DELETE" });
+
+// User API
+export const searchUsers = (search: string) => fetchAPI(`/users?search=${search}`);
+
+// Message read status API
+export const markMessagesAsRead = (chatId: string) => 
+  fetchAPI("/messages/read", { method: "PUT", body: { chatId } });
+
+// Message delivered status API
+export const markMessagesAsDelivered = (chatId: string) => 
+  fetchAPI("/messages/deliver", { method: "PUT", body: { chatId } });
