@@ -44,8 +44,9 @@ const WhatsAppStyleMedia: React.FC<WhatsAppStyleMediaProps> = ({
       console.log('Using absolute URL:', url);
       return url;
     } else {
-      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-      const finalUrl = url.startsWith('/') ? `${baseUrl}${url}` : `${baseUrl}/${url}`;
+      // Get the base URL from your API_URL without the /api part
+      const API_URL = "http://localhost:5000";
+      const finalUrl = url.startsWith('/') ? `${API_URL}${url}` : `${API_URL}/${url}`;
       console.log('Constructed full URL:', finalUrl);
       return finalUrl;
     }
